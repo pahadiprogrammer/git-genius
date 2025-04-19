@@ -49,6 +49,18 @@ def execute_command(command: dict, repo_state: dict):
         else:
             print(f"⚠️ File already staged: {file}")
 
+    elif action == "status":
+        current = repo_state["current_branch"]
+        print(f"\n🔎 Repo Status:")
+        print(f"🔀 Branch: {current}")
+        print(f"📥 Staged files: {repo_state['staging_area'] or 'None'}")
+
+        history = repo_state["branches"][current]
+        if not history:
+            print("📜 No commits yet.")
+        else:
+            print(f"✅ Last Commit: {history[-1]['message']}")
+            print(f"   ↪ Files: {history[-1]['files']}")
 
     else:
         print("⚠️ Unknown action:", action)

@@ -49,6 +49,12 @@ def parse_command(command: str) -> Optional[Dict]:
             "action": "stage_file",
             "file": match.group(1)
         }
+    
+    # English: show status
+    if command.strip().lower() == "show status":
+        return {
+            "action": "status"
+        }
 
     # Extend here with more patterns later
     return None
