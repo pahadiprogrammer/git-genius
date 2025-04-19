@@ -42,6 +42,13 @@ def parse_command(command: str) -> Optional[Dict]:
             "action": "create_repo",
             "name": match.group(1)
         }
+    
+    match = re.match(r"add file ([\w.\-_/]+) to staging", command)
+    if match:
+        return {
+            "action": "stage_file",
+            "file": match.group(1)
+        }
 
     # Extend here with more patterns later
     return None

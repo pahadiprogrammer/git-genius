@@ -14,8 +14,14 @@ def execute_command(command: dict, repo_state: dict):
     elif action == "commit":
         message = command.get("message")
         current = repo_state["current_branch"]
-        repo_state["branches"][current].append(message)
-        print(f"✅ Committed to {current}: {message}")
+        files = list(repo_state["staging_area"])  # snapshot
+        commit_data = {
+            "message": message,
+            "files": files
+        }
+        repo_state["branches"][current].append(commit_data)
+        repo_state["staging_area"] = []  # clear staging after commit
+        print(f"✅ Committed: '{message}' with files: {files}")
 
     elif action == "switch_branch":
         target = command.get("name")
@@ -28,12 +34,21 @@ def execute_command(command: dict, repo_state: dict):
     elif action == "show_history":
         current = repo_state["current_branch"]
         print(f"📜 Commit history for '{current}':")
-        for i, msg in enumerate(repo_state["branches"][current]):
-            print(f"  {i+1}. {msg}")
+        for i, commit in enumerate(repo_state["branches"][current]):
+            print(f"  {i+1}. {commit['message']} | Files: {commit['files']}")
 
     elif action == "create_repo":
         repo_name = command.get("name")
         print(f"📁 New repo '{repo_name}' initialized (simulated).")
+
+    elif action == "stage_file":
+        file = command.get("file")
+        if file not in repo_state["staging_area"]:
+            repo_state["staging_area"].append(file)
+            print(f"📥 Staged file: {file}")
+        else:
+            print(f"⚠️ File already staged: {file}")
+
 
     else:
         print("⚠️ Unknown action:", action)

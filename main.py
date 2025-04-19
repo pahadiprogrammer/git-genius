@@ -6,7 +6,8 @@ if __name__ == '__main__':
         "branches": {
             "main": []
         },
-        "current_branch": "main"
+        "current_branch": "main",
+        "staging_area": []
     }
     print("Welcome to Git Genius 🚀")
     while True:
