@@ -5,12 +5,12 @@ def parse_command(command: str) -> Optional[Dict]:
     command = command.lower().strip()
 
     # Pattern: Create a new branch from main called feature/login
-    match = re.match(r"create a new branch from (\w+) called ([\w/-]+)", command)
+    match = re.match(r"create new branch ([\w/-]+) from (\w+)", command)
     if match:
         return {
             "action": "create_branch",
-            "from": match.group(1),
-            "name": match.group(2)
+            "from": match.group(2),
+            "name": match.group(1)
         }
 
     # Pattern: Commit changes with message 'Initial commit'
@@ -64,6 +64,13 @@ def parse_command(command: str) -> Optional[Dict]:
         return {
             "action": "status"
         }
+    
+    # 9. Show all commands
+    if command.strip().lower() == "show all commands":
+        return {
+            "action": "help"
+        }
+
 
     # Extend here with more patterns later
     return None

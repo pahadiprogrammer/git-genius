@@ -78,11 +78,35 @@ def execute_command(command: dict, repo_state: dict):
 
         if not to_merge:
             print(f"⚖️ Branch '{source_branch}' is already merged into '{current}'")
-        else:
-            repo_state["branches"][current].extend(to_merge)
-            print(f"🔀 Merged {len(to_merge)} commits from '{source_branch}' into '{current}'")
+            return repo_state
+
+        # Detect conflicts from latest commit in each branch
+        source_last = source_commits[-1]["files"] if source_commits else []
+        current_last = current_commits[-1]["files"] if current_commits else []
+
+        conflicts = list(set(source_last) & set(current_last))
+
+        if conflicts:
+            print(f"❌ Merge conflict detected on files: {conflicts}")
+            print("🛠️ Please resolve conflicts manually before merging.")
+            return repo_state
+
+        # No conflict, proceed with merge
+        repo_state["branches"][current].extend(to_merge)
+        print(f"🔀 Merged {len(to_merge)} commits from '{source_branch}' into '{current}'")
 
         return repo_state
+    
+    elif action == "help":
+        print("\n🧠 Available Natural Language Commands:")
+        print("- create new branch <branch_name> from <existing_branch>")
+        print("- switch to branch <branch_name>")
+        print("- add file <filename> to staging")
+        print("- commit changes with message \"<message>\"")
+        print("- show commit history")
+        print("- show status")
+        print("- merge branch <branch_name> into current")
+        print("- show all commands (this one!)")
 
     else:
         print("⚠️ Unknown action:", action)
