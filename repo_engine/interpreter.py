@@ -14,13 +14,13 @@ def execute_command(command: dict, repo_state: dict):
     elif action == "commit":
         message = command.get("message")
         current = repo_state["current_branch"]
-        files = list(repo_state["staging_area"])  # snapshot
+        files = repo_state["staging_area"].copy()  # snapshot
         commit_data = {
             "message": message,
             "files": files
         }
         repo_state["branches"][current].append(commit_data)
-        repo_state["staging_area"] = []  # clear staging after commit
+        repo_state["staging_area"].clear()  # clear staging after commit
         print(f"✅ Committed: '{message}' with files: {files}")
 
     elif action == "switch_branch":
@@ -32,28 +32,28 @@ def execute_command(command: dict, repo_state: dict):
             print(f"❌ Branch '{target}' does not exist.")
 
     elif action == "show_history":
-        current = repo_state["current_branch"]
-        print(f"📜 Commit history for '{current}':")
-        for i, commit in enumerate(repo_state["branches"][current]):
-            print(f"  {i+1}. {commit['message']} | Files: {commit['files']}")
+        commits = repo_state["branches"][repo_state["current_branch"]]
+        for i, commit in enumerate(commits, 1):
+            print(f"🔖 Commit {i}: {commit['message']}")
+            for fname, content in commit['files'].items():
+                print(f"   📄 {fname}: {content[:30]}{'...' if len(content) > 30 else ''}")
 
     elif action == "create_repo":
         repo_name = command.get("name")
         print(f"📁 New repo '{repo_name}' initialized (simulated).")
 
     elif action == "stage_file":
-        file = command.get("file")
-        if file not in repo_state["staging_area"]:
-            repo_state["staging_area"].append(file)
-            print(f"📥 Staged file: {file}")
-        else:
-            print(f"⚠️ File already staged: {file}")
+        filename = command.get("file")
+        content = input(f"📝 Enter content for {filename}: ")
+        repo_state["staging_area"][filename] = content
+        print(f"📄 Staged file: {filename}")
+        return repo_state
 
     elif action == "status":
         current = repo_state["current_branch"]
         print(f"\n🔎 Repo Status:")
         print(f"🔀 Branch: {current}")
-        print(f"📥 Staged files: {repo_state['staging_area'] or 'None'}")
+        print(f"📥 Staged files: {repo_state['staging_area'].keys() or 'None'}")
 
         history = repo_state["branches"][current]
         if not history:

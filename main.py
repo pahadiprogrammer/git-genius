@@ -7,7 +7,8 @@ if __name__ == '__main__':
             "main": []
         },
         "current_branch": "main",
-        "staging_area": []
+        "staging_area": {},  # ← was a list, now a dict
+        "merge_conflicts": []
     }
     print("Welcome to Git Genius 🚀")
     while True:
