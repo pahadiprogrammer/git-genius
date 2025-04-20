@@ -62,6 +62,28 @@ def execute_command(command: dict, repo_state: dict):
             print(f"✅ Last Commit: {history[-1]['message']}")
             print(f"   ↪ Files: {history[-1]['files']}")
 
+    elif action == "merge_branch":
+        source_branch = command.get("source")
+        current = repo_state["current_branch"]
+
+        if source_branch not in repo_state["branches"]:
+            print(f"❌ Branch '{source_branch}' does not exist.")
+            return repo_state
+
+        source_commits = repo_state["branches"][source_branch]
+        current_commits = repo_state["branches"][current]
+
+        # Find commits in source not already in current
+        to_merge = [c for c in source_commits if c not in current_commits]
+
+        if not to_merge:
+            print(f"⚖️ Branch '{source_branch}' is already merged into '{current}'")
+        else:
+            repo_state["branches"][current].extend(to_merge)
+            print(f"🔀 Merged {len(to_merge)} commits from '{source_branch}' into '{current}'")
+
+        return repo_state
+
     else:
         print("⚠️ Unknown action:", action)
 

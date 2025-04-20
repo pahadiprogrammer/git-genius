@@ -35,7 +35,7 @@ def parse_command(command: str) -> Optional[Dict]:
             "action": "show_history"
         }
     
-    # 5. Create a new repo named my-repo
+    # 5. Create a new repo named <my-repo>
     match = re.match(r"create a new repo named ([\w-]+)", command)
     if match:
         return {
@@ -43,6 +43,7 @@ def parse_command(command: str) -> Optional[Dict]:
             "name": match.group(1)
         }
     
+    # 6. Add file to staging
     match = re.match(r"add file ([\w.\-_/]+) to staging", command)
     if match:
         return {
@@ -50,7 +51,15 @@ def parse_command(command: str) -> Optional[Dict]:
             "file": match.group(1)
         }
     
-    # English: show status
+    # 7. Merge branch <feature/login> into current
+    match = re.match(r"merge branch ([\w/\-]+) into current", command)
+    if match:
+        return {
+            "action": "merge_branch",
+            "source": match.group(1)
+        }
+    
+    # 8. Show status
     if command.strip().lower() == "show status":
         return {
             "action": "status"
