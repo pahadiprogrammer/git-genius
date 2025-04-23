@@ -70,6 +70,36 @@ def parse_command(command: str) -> Optional[Dict]:
         return {
             "action": "help"
         }
+    
+    # 10. View current branch files
+    if command.strip() == "view files":
+        return {
+            "action": "view_files"
+        }
+    
+    # 11. Edit file
+    match = re.match(r"edit file ([\w.\-_/]+)", command)
+    if match:
+        return {
+            "action": "edit_file",
+            "file": match.group(1)
+        }
+
+    # 12. Delete file
+    match = re.match(r"delete file ([\w.\-_/]+)", command)
+    if match:
+        return {
+            "action": "delete_file",
+            "file": match.group(1)
+        }
+
+    # 13. View file
+    match = re.match(r"view file ([\w.\-_/]+)", command)
+    if match:
+        return {
+            "action": "view_file",
+            "file": match.group(1)
+        }
 
 
     # Extend here with more patterns later

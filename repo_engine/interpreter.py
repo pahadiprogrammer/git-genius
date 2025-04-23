@@ -46,6 +46,11 @@ def execute_command(command: dict, repo_state: dict):
         filename = command.get("file")
         content = input(f"📝 Enter content for {filename}: ")
         repo_state["staging_area"][filename] = content
+        current = repo_state["current_branch"]
+        
+        # The file exists in working directory before we even add it to staging area
+        repo_state["working_directory"].setdefault(current, {})[filename] = content
+        
         print(f"📄 Staged file: {filename}")
         return repo_state
 
@@ -97,6 +102,54 @@ def execute_command(command: dict, repo_state: dict):
 
         return repo_state
     
+    elif action == "view_files":
+        current = repo_state["current_branch"]
+        files = repo_state["working_directory"].get(current, {})
+        if not files:
+            print("📂 No files in working directory.")
+        else:
+            print(f"\n📁 Files in branch '{current}':")
+            for fname, content in files.items():
+                print(f"📄 {fname}: {content[:50]}{'...' if len(content) > 50 else ''}")
+
+    elif action == "edit_file":
+        filename = command.get("file")
+        current = repo_state["current_branch"]
+        files = repo_state["working_directory"].get(current, {})
+
+        if filename not in files:
+            print(f"❌ File '{filename}' does not exist in working directory.")
+        else:
+            print(f"📄 Current content of {filename}:")
+            print(files[filename])
+            new_content = input("📝 Enter new content: ")
+            files[filename] = new_content
+            repo_state["staging_area"][filename] = new_content
+            print(f"✅ Updated and staged file: {filename}")
+
+    elif action == "delete_file":
+        filename = command.get("file")
+        current = repo_state["current_branch"]
+        files = repo_state["working_directory"].get(current, {})
+
+        if filename not in files:
+            print(f"❌ File '{filename}' not found in working directory.")
+        else:
+            del files[filename]
+            repo_state["staging_area"][filename] = "[DELETED]"
+            print(f"🗑️ Deleted '{filename}' and marked for deletion in next commit.")
+
+    elif action == "view_file":
+        filename = command.get("file")
+        current = repo_state["current_branch"]
+        files = repo_state["working_directory"].get(current, {})
+
+        if filename in files:
+            print(f"\n📖 Contents of '{filename}':\n")
+            print(files[filename])
+        else:
+            print(f"❌ File '{filename}' not found in working directory.")
+
     elif action == "help":
         print("\n🧠 Available Natural Language Commands:")
         print("- create new branch <branch_name> from <existing_branch>")
