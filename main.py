@@ -11,7 +11,8 @@ if __name__ == '__main__':
         "merge_conflicts": [],
         "working_directory": {
             "main": {}
-        }
+        },
+        "tags": {}
     }
     print("Welcome to Git Genius 🚀")
     while True:

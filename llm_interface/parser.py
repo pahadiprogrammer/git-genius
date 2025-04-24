@@ -100,6 +100,35 @@ def parse_command(command: str) -> Optional[Dict]:
             "action": "view_file",
             "file": match.group(1)
         }
+    
+    # 14. Tag commit as v1.0
+    match = re.match(r"tag commit as ([\w.\-]+)", command)
+    if match:
+        return {
+            "action": "tag_commit",
+            "tag": match.group(1)
+        }
+
+    # 15. List all tags
+    if command.strip() == "list all tags":
+        return {
+            "action": "list_tags"
+        }
+
+    # 16. Checkout tag <v1.0>
+    match = re.match(r"checkout tag ([\w.\-]+)", command)
+    if match:
+        return {
+            "action": "checkout_tag",
+            "tag": match.group(1)
+        }
+    
+    # 17. Show current branch
+    match = re.match(r"show current branch", command)
+    if match:
+        return {
+            "action": "current_branch"
+        }
 
 
     # Extend here with more patterns later

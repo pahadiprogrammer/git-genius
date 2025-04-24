@@ -150,6 +150,52 @@ def execute_command(command: dict, repo_state: dict):
         else:
             print(f"❌ File '{filename}' not found in working directory.")
 
+    elif action == "tag_commit":
+        tag_name = command.get("tag")
+        current = repo_state["current_branch"]
+        commits = repo_state["branches"][current]
+
+        if not commits:
+            print("❌ Cannot tag: No commits on current branch.")
+        else:
+            # Tag the latest commit
+            repo_state.setdefault("tags", {})[tag_name] = {
+                "branch": current,
+                "commit_index": len(commits) - 1
+            }
+            print(f"🏷️ Tagged latest commit as '{tag_name}'")
+
+    elif action == "list_tags":
+        tags = repo_state.get("tags", {})
+        if not tags:
+            print("🔖 No tags created yet.")
+        else:
+            print("🏷️ Tags:")
+            for tag, data in tags.items():
+                print(f"🔸 {tag} → Branch: {data['branch']}, Commit #{data['commit_index'] + 1}")
+
+    elif action == "checkout_tag":
+        tag = command.get("tag")
+        tags = repo_state.get("tags", {})
+
+        if tag not in tags:
+            print(f"❌ Tag '{tag}' not found.")
+        else:
+            tag_data = tags[tag]
+            branch = tag_data["branch"]
+            commit_idx = tag_data["commit_index"]
+
+            commit = repo_state["branches"][branch][commit_idx]
+            print(f"\n📦 Checked out tag '{tag}' → Commit {commit_idx + 1} on branch '{branch}'")
+            print(f"📜 Message: {commit['message']}")
+            print("📄 Files:")
+            for fname, content in commit["files"].items():
+                print(f"   📄 {fname}: {content[:30]}{'...' if len(content) > 30 else ''}")
+
+    elif action == "current_branch":
+        current_branch = repo_state["current_branch"]
+        print(f"🔍 Current branch: {current_branch}")
+
     elif action == "help":
         print("\n🧠 Available Natural Language Commands:")
         print("- create new branch <branch_name> from <existing_branch>")
