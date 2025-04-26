@@ -1,3 +1,31 @@
+import json
+import os
+
+VCS_STATE_FILE = ".vcs_state.json"
+
+def save_repo_state(repo_state):
+    with open(VCS_STATE_FILE, "w") as f:
+        json.dump(repo_state, f, indent=4)
+
+def load_repo_state():
+    if os.path.exists(VCS_STATE_FILE):
+        with open(VCS_STATE_FILE, "r") as f:
+            return json.load(f)
+    else:
+        # Fresh new state
+        return {
+            "branches": {
+                "main": []
+            },
+            "current_branch": "main",
+            "staging_area": {},
+            "merge_conflicts": [],
+            "working_directory": {
+                "main": {}
+            },
+            "tags": {}
+        }
+
 def execute_command(command: dict, repo_state: dict):
     action = command.get("action")
 
