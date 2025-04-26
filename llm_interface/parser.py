@@ -129,7 +129,12 @@ def parse_command(command: str) -> Optional[Dict]:
         return {
             "action": "current_branch"
         }
-
+    
+    # 18. Show activity log
+    if command.strip() == "show activity log":
+        return {
+            "action": "show_log"
+        }
 
     # Extend here with more patterns later
     return None

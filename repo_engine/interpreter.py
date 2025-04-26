@@ -8,6 +8,7 @@ def execute_command(command: dict, repo_state: dict):
             repo_state["branches"][new_branch] = list(repo_state["branches"][from_branch])
             repo_state["current_branch"] = new_branch
             print(f"✅ Created branch '{new_branch}' from '{from_branch}'")
+            log_event(repo_state, f"🪄 Created branch '{new_branch}' from '{from_branch}'")
         else:
             print(f"❌ Branch '{from_branch}' does not exist.")
 
@@ -28,6 +29,7 @@ def execute_command(command: dict, repo_state: dict):
         if target in repo_state["branches"]:
             repo_state["current_branch"] = target
             print(f"🔁 Switched to branch: {target}")
+            log_event(repo_state, f"🔁 Switched to branch '{target}'")
         else:
             print(f"❌ Branch '{target}' does not exist.")
 
@@ -66,6 +68,7 @@ def execute_command(command: dict, repo_state: dict):
         else:
             print(f"✅ Last Commit: {history[-1]['message']}")
             print(f"   ↪ Files: {history[-1]['files']}")
+            log_event(repo_state, f"🏷️ status")
 
     elif action == "merge_branch":
         source_branch = command.get("source")
@@ -100,6 +103,8 @@ def execute_command(command: dict, repo_state: dict):
         repo_state["branches"][current].extend(to_merge)
         print(f"🔀 Merged {len(to_merge)} commits from '{source_branch}' into '{current}'")
 
+        log_event(repo_state, f"🔀 Merged from '{source_branch}' to '{current}'")
+
         return repo_state
     
     elif action == "view_files":
@@ -111,6 +116,7 @@ def execute_command(command: dict, repo_state: dict):
             print(f"\n📁 Files in branch '{current}':")
             for fname, content in files.items():
                 print(f"📄 {fname}: {content[:50]}{'...' if len(content) > 50 else ''}")
+            log_event(repo_state, f"🏷️ view files")
 
     elif action == "edit_file":
         filename = command.get("file")
@@ -126,6 +132,7 @@ def execute_command(command: dict, repo_state: dict):
             files[filename] = new_content
             repo_state["staging_area"][filename] = new_content
             print(f"✅ Updated and staged file: {filename}")
+            log_event(repo_state, f"🏷️ editing file '{filename}'")
 
     elif action == "delete_file":
         filename = command.get("file")
@@ -138,6 +145,7 @@ def execute_command(command: dict, repo_state: dict):
             del files[filename]
             repo_state["staging_area"][filename] = "[DELETED]"
             print(f"🗑️ Deleted '{filename}' and marked for deletion in next commit.")
+            log_event(repo_state, f"🗑️ Deleted file: {filename}")
 
     elif action == "view_file":
         filename = command.get("file")
@@ -149,6 +157,8 @@ def execute_command(command: dict, repo_state: dict):
             print(files[filename])
         else:
             print(f"❌ File '{filename}' not found in working directory.")
+        
+        log_event(repo_state, f"🏷️ viewing file '{filename}'")
 
     elif action == "tag_commit":
         tag_name = command.get("tag")
@@ -164,6 +174,7 @@ def execute_command(command: dict, repo_state: dict):
                 "commit_index": len(commits) - 1
             }
             print(f"🏷️ Tagged latest commit as '{tag_name}'")
+            log_event(repo_state, f"🏷️ Tagged commit as '{tag_name}' on branch '{current}'")
 
     elif action == "list_tags":
         tags = repo_state.get("tags", {})
@@ -173,6 +184,8 @@ def execute_command(command: dict, repo_state: dict):
             print("🏷️ Tags:")
             for tag, data in tags.items():
                 print(f"🔸 {tag} → Branch: {data['branch']}, Commit #{data['commit_index'] + 1}")
+            
+            log_event(repo_state, f"🏷️ listing tags")
 
     elif action == "checkout_tag":
         tag = command.get("tag")
@@ -192,9 +205,20 @@ def execute_command(command: dict, repo_state: dict):
             for fname, content in commit["files"].items():
                 print(f"   📄 {fname}: {content[:30]}{'...' if len(content) > 30 else ''}")
 
+            log_event(repo_state, f"🏷️ checkout tag '{tag}'")
+
     elif action == "current_branch":
         current_branch = repo_state["current_branch"]
         print(f"🔍 Current branch: {current_branch}")
+
+    elif action == "show_log":
+        logs = repo_state.get("log", [])
+        if not logs:
+            print("📭 No activity logged yet.")
+        else:
+            print("\n🕘 Activity Log:")
+            for i, entry in enumerate(logs, 1):
+                print(f"{i}. {entry}")
 
     elif action == "help":
         print("\n🧠 Available Natural Language Commands:")
@@ -211,3 +235,6 @@ def execute_command(command: dict, repo_state: dict):
         print("⚠️ Unknown action:", action)
 
     return repo_state
+
+def log_event(repo_state, description):
+    repo_state.setdefault("log", []).append(description)
