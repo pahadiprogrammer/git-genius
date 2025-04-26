@@ -82,6 +82,8 @@ def execute_command(command: dict, repo_state: dict):
         repo_state["working_directory"].setdefault(current, {})[filename] = content
         
         print(f"📄 Staged file: {filename}")
+        log_event(repo_state, f"Adding file '{filename}' to stageing areas")
+
         return repo_state
 
     elif action == "status":
