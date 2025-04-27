@@ -135,6 +135,14 @@ def parse_command(command: str) -> Optional[Dict]:
         return {
             "action": "show_log"
         }
+    
+    # 19. Push branch <branch-name> to remote
+    match = re.match(r"push branch ([\w/-]+) to remote", command)
+    if match:
+        return {
+            "action": "push_to_remote",
+            "branch": match.group(1)
+        }
 
     # Extend here with more patterns later
     return None

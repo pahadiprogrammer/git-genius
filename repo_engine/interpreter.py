@@ -1,5 +1,6 @@
 import json
 import os
+from repo_engine.remote import load_remote_repo, save_remote_repo, init_remote_repo
 
 VCS_STATE_FILE = ".vcs_state.json"
 
@@ -249,6 +250,33 @@ def execute_command(command: dict, repo_state: dict):
             print("\n🕘 Activity Log:")
             for i, entry in enumerate(logs, 1):
                 print(f"{i}. {entry}")
+
+    elif action == "push_to_remote":
+        branch = command.get("branch")
+        remote_repo = load_remote_repo()
+
+        if branch not in repo_state["branches"]:
+            print(f"❌ Local branch '{branch}' does not exist.")
+            return repo_state
+
+        local_commits = repo_state["branches"][branch]
+
+        if branch not in remote_repo["branches"]:
+            # Create branch on remote
+            remote_repo["branches"][branch] = list(local_commits)
+            print(f"🚀 Pushed new branch '{branch}' to remote.")
+        else:
+            remote_commits = remote_repo["branches"][branch]
+            # Find commits not in remote and add them
+            new_commits = [c for c in local_commits if c not in remote_commits]
+            if new_commits:
+                remote_repo["branches"][branch].extend(new_commits)
+                print(f"🚀 Pushed {len(new_commits)} new commits to branch '{branch}' on remote.")
+            else:
+                print(f"✅ Remote branch '{branch}' already up-to-date.")
+
+        save_remote_repo(remote_repo)
+        log_event(repo_state, f"🚀 Pushed branch '{branch}' to remote")
 
     elif action == "help":
         print("\n🧠 Available Natural Language Commands:")
